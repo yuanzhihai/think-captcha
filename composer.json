@@ -14,10 +14,16 @@
     "autoload": {
         "psr-4": {
             "yzh52521\\captcha\\": "src/"
-        }
+        },
+         "files": [
+                    "src/helper.php"
+                ]
     },
     "extra": {
         "think": {
+        "services": [
+                        "yzh52521\\captcha\\CaptchaService"
+                    ],
             "config":{
                 "captcha": "src/config.php"
             }
