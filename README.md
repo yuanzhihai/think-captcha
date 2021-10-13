@@ -59,7 +59,7 @@ if(!captcha_check($captcha)){
 ~~~
 public function captcha($id = '')
 {
-   return yzh52521\captcha\Captcha($id,true);
+   return yzh52521\captcha\facade\Captcha($id,true);
 }
 ~~~
 
@@ -68,7 +68,7 @@ public function captcha($id = '')
 ### api验证
 
 ~~~
-if (!yzh52521\captcha\Captcha::checkApi($data['verify'], $data['key'])) {
+if (!yzh52521\captcha\facade\Captcha::checkApi($data['verify'], $data['key'])) {
    throw new ValidateException('验证码错误');
 }
 ~~~
