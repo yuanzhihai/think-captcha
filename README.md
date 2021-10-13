@@ -1,6 +1,6 @@
 # think-captcha
 
-thinkphp6 验证码类库
+thinkphp6  验证码类库 支持前后端分离，api接口调用
 
 ## 安装
 > composer require yzh52521/think-captcha
