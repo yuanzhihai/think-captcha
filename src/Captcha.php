@@ -54,6 +54,8 @@ class Captcha
     protected $fontttf = '';
     // 背景颜色
     protected $bg = [243, 251, 254];
+
+    protected $meet = ['+', '-', 'x'];
     //算术验证码
     protected $math = false;
 
@@ -102,11 +104,21 @@ class Captcha
         if ($this->math) {
             $this->useZh  = false;
             $this->length = 5;
-
-            $x   = random_int(10, 30);
-            $y   = random_int(1, 9);
-            $bag = "{$x} + {$y} = ";
-            $key = $x + $y;
+            $meet         = $this->meet[array_rand($this->meet, 1)];
+            $x            = random_int(5, 20);
+            $y            = random_int(1, 9);
+            $bag          = "{$x} $meet {$y} = ";
+            switch ($meet) {
+                case '+':
+                    $key = $x + $y;
+                    break;
+                case '-':
+                    $key = $x - $y;
+                    break;
+                case 'x':
+                    $key = $x * $y;
+                    break;
+            }
             $key .= '';
         } else {
             if ($this->useZh) {
