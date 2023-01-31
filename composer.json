@@ -1,32 +1,32 @@
 {
-    "name": "yzh52521/think-captcha",
-    "description": "captcha package for thinkphp",
-    "authors": [
-        {
-            "name": "yzh52521",
-            "email": "396751927@qq.com"
-        }
-    ],
-    "license": "Apache-2.0",
-    "require": {
-        "topthink/framework": "^6"
-    },
-    "autoload": {
-        "psr-4": {
-            "yzh52521\\captcha\\": "src/"
-        },
-         "files": [
-                    "src/helper.php"
-                ]
-    },
-    "extra": {
-        "think": {
-        "services": [
-                        "yzh52521\\captcha\\CaptchaService"
-                    ],
-            "config":{
-                "captcha": "src/config.php"
-            }
-        }
+  "name": "yzh52521/think-captcha",
+  "description": "captcha package for thinkphp",
+  "authors": [
+    {
+      "name": "yzh52521",
+      "email": "396751927@qq.com"
     }
+  ],
+  "license": "Apache-2.0",
+  "require": {
+    "topthink/framework": "^6|^8"
+  },
+  "autoload": {
+    "psr-4": {
+      "yzh52521\\captcha\\": "src/"
+    },
+    "files": [
+      "src/helper.php"
+    ]
+  },
+  "extra": {
+    "think": {
+      "services": [
+        "yzh52521\\captcha\\CaptchaService"
+      ],
+      "config": {
+        "captcha": "src/config.php"
+      }
+    }
+  }
 }
