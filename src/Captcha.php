@@ -258,7 +258,7 @@ class Captcha
         ); // 验证码
 
         foreach ( $text as $index => $char ) {
-            $x     = $this->fontSize * ( $index + 1 ) * mt_rand( 1.2,1.6 ) * ( $this->math ? 1 : 1.5 );
+            $x     = $this->fontSize * ( $index + 1 ) * floatval(mt_rand(12,16)/10) * ( $this->math ? 1 : 1.5 );
             $y     = $this->fontSize + mt_rand( 10,20 );
             $angle = $this->math ? 0 : mt_rand( -40,40 );
 
@@ -297,10 +297,10 @@ class Captcha
         $px = $py = 0;
 
         // 曲线前部分
-        $A = mt_rand( 1,$this->imageH / 2 ); // 振幅
+        $A = mt_rand( 1,intval($this->imageH / 2) ); // 振幅
         $b = mt_rand( intval( -$this->imageH / 4 ),intval( $this->imageH / 4 ) ); // Y轴方向偏移量
         $f = mt_rand( intval( -$this->imageH / 4 ),intval( $this->imageH / 4 ) ); // X轴方向偏移量
-        $T = mt_rand( $this->imageH,$this->imageW * 2 ); // 周期
+        $T = mt_rand( intval($this->imageH),intval($this->imageW * 2 )); // 周期
         $w = ( 2 * M_PI ) / $T;
 
         $px1 = 0; // 曲线横坐标起始位置
@@ -318,9 +318,9 @@ class Captcha
         }
 
         // 曲线后部分
-        $A   = mt_rand( 1,$this->imageH / 2 ); // 振幅
+        $A   = mt_rand( 1,intval($this->imageH / 2) ); // 振幅
         $f   = mt_rand( intval( -$this->imageH / 4 ),intval( $this->imageH / 4 ) ); // X轴方向偏移量
-        $T   = mt_rand( $this->imageH,$this->imageW * 2 ); // 周期
+        $T   = mt_rand( intval($this->imageH),intval($this->imageW * 2) ); // 周期
         $w   = ( 2 * M_PI ) / $T;
         $b   = $py - $A * sin( $w * $px + $f ) - $this->imageH / 2;
         $px1 = $px2;
@@ -350,7 +350,7 @@ class Captcha
             $noiseColor = imagecolorallocate( $this->im,mt_rand( 150,225 ),mt_rand( 150,225 ),mt_rand( 150,225 ) );
             for ( $j = 0; $j < 5; $j++ ) {
                 // 绘杂点
-                imagestring( $this->im,5,mt_rand( -10,$this->imageW ),mt_rand( -10,$this->imageH ),$codeSet[mt_rand( 0,29 )],$noiseColor );
+                imagestring( $this->im,5,mt_rand( -10,intval($this->imageW) ),mt_rand( -10,intval($this->imageH) ),$codeSet[mt_rand( 0,29 )],$noiseColor );
             }
         }
     }
