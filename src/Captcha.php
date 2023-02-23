@@ -304,11 +304,11 @@ class Captcha
         $w = ( 2 * M_PI ) / $T;
 
         $px1 = 0; // 曲线横坐标起始位置
-        $px2 = mt_rand( $this->imageW / 2,$this->imageW * 0.8 ); // 曲线横坐标结束位置
+        $px2 = mt_rand( intval($this->imageW / 2),intval($this->imageW * 0.8) ); // 曲线横坐标结束位置
 
         for ( $px = $px1; $px <= $px2; $px = $px + 1 ) {
             if (0 != $w) {
-                $py = $A * sin( $w * $px + $f ) + $b + $this->imageH / 2; // y = Asin(ωx+φ) + b
+                $py = $A * sin( $w * $px + $f ) + $b + intval($this->imageH / 2); // y = Asin(ωx+φ) + b
                 $i  = (int)( $this->fontSize / 5 );
                 while ( $i > 0 ) {
                     imagesetpixel( $this->im,intval( $px + $i ),intval( $py + $i ),$this->color ); // 这里(while)循环画像素点比imagettftext和imagestring用字体大小一次画出（不用这while循环）性能要好很多
