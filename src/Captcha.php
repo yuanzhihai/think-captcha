@@ -1,6 +1,6 @@
 <?php
 
-namespace think\captcha;
+namespace yzh52521\captcha;
 
 use Exception;
 use think\Cache;
