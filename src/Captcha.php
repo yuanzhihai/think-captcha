@@ -1,6 +1,6 @@
 <?php
 
-namespace yzh52521\captcha;
+namespace think\captcha;
 
 use Exception;
 use think\Cache;
@@ -64,7 +64,6 @@ class Captcha
      * @access public
      * @param Config $config
      * @param Session $session
-     * @param Cache $cache
      */
     public function __construct(Config $config,Session $session,Cache $cache)
     {
@@ -94,10 +93,11 @@ class Captcha
 
     /**
      * 创建验证码
+     * @param bool $api
      * @return array
      * @throws Exception
      */
-    protected function generate($api = false): array
+    protected function generate(bool $api = false): array
     {
         $bag = '';
 
@@ -137,9 +137,14 @@ class Captcha
         $hash = password_hash( $key,PASSWORD_BCRYPT,['cost' => 10] );
 
         if ($api) {
-            $this->cache->set( 'captcha.'.$hash,1,$this->expire );
+            $this->cache->set( 'captcha.'.$hash,
+                1,
+                $this->expire
+            );
         } else {
-            $this->session->set( 'captcha',['key' => $hash] );
+            $this->session->set( 'captcha',[
+                'key' => $hash,
+            ] );
         }
 
         return [
@@ -147,7 +152,6 @@ class Captcha
             'key'   => $hash,
         ];
     }
-
 
     /**
      * api验证验证码是否正确
@@ -159,6 +163,7 @@ class Captcha
     public function checkApi(string $code,string $hash): bool
     {
         $res = false;
+
         if ($this->cache->get( 'captcha.'.$hash )) {
             $code = mb_strtolower( $code,'UTF-8' );
             $res  = password_verify( $code,$hash );
@@ -201,18 +206,21 @@ class Captcha
      * @access public
      * @param null|string $config
      * @param bool $api
-     * @return Response|array
+     * @return Response
      */
-    public function create(string $config = null,bool $api = false)
+    public function create(string $config = null,bool $api = false): Response
     {
         $this->configure( $config );
 
-        $generator = $this->generate( $api );
+        $generator = $this->generate();
 
         // 图片宽(px)
         $this->imageW || $this->imageW = $this->length * $this->fontSize * 1.5 + $this->length * $this->fontSize / 2;
         // 图片高(px)
         $this->imageH || $this->imageH = $this->fontSize * 2.5;
+
+        $this->imageW = intval( $this->imageW );
+        $this->imageH = intval( $this->imageH );
 
         // 建立一幅 $this->imageW x $this->imageH 的图像
         $this->im = imagecreate( (int)$this->imageW,(int)$this->imageH );
@@ -253,16 +261,15 @@ class Captcha
         }
 
         // 绘验证码
-        $text = $this->useZh ? preg_split( '/(?<!^)(?!$)/u',$generator['value'] ) : str_split(
-            $generator['value']
-        ); // 验证码
+        $text = $this->useZh ? preg_split( '/(?<!^)(?!$)/u',$generator['value'] ) : str_split( $generator['value'] ); // 验证码
 
         foreach ( $text as $index => $char ) {
-            $x     = $this->fontSize * ( $index + 1 ) * floatval(mt_rand(12,16)/10) * ( $this->math ? 1 : 1.5 );
+
+            $x     = $this->fontSize * ( $index + 1 ) * ( $this->math ? 1 : 1.5 );
             $y     = $this->fontSize + mt_rand( 10,20 );
             $angle = $this->math ? 0 : mt_rand( -40,40 );
 
-            imagettftext( $this->im,(int)$this->fontSize,(int)$angle,(int)$x,(int)$y,$this->color,$fontttf,$char );
+            imagettftext( $this->im,intval( $this->fontSize ),intval( $this->fontSize ),intval( $x ),intval( $y ),$this->color,$fontttf,$char );
         }
 
         ob_start();
@@ -270,6 +277,7 @@ class Captcha
         imagepng( $this->im );
         $content = ob_get_clean();
         imagedestroy( $this->im );
+
         if ($api) {
             return [
                 'img' => 'data:image/png;base64,'.chunk_split( base64_encode( $content ) ),
@@ -297,18 +305,18 @@ class Captcha
         $px = $py = 0;
 
         // 曲线前部分
-        $A = mt_rand( 1,intval($this->imageH / 2) ); // 振幅
+        $A = mt_rand( 1,$this->imageH / 2 ); // 振幅
         $b = mt_rand( intval( -$this->imageH / 4 ),intval( $this->imageH / 4 ) ); // Y轴方向偏移量
         $f = mt_rand( intval( -$this->imageH / 4 ),intval( $this->imageH / 4 ) ); // X轴方向偏移量
-        $T = mt_rand( intval($this->imageH),intval($this->imageW * 2 )); // 周期
+        $T = mt_rand( $this->imageH,$this->imageW * 2 ); // 周期
         $w = ( 2 * M_PI ) / $T;
 
         $px1 = 0; // 曲线横坐标起始位置
-        $px2 = mt_rand( intval($this->imageW / 2),intval($this->imageW * 0.8) ); // 曲线横坐标结束位置
+        $px2 = mt_rand( $this->imageW / 2,$this->imageW * 0.8 ); // 曲线横坐标结束位置
 
         for ( $px = $px1; $px <= $px2; $px = $px + 1 ) {
             if (0 != $w) {
-                $py = $A * sin( $w * $px + $f ) + $b + intval($this->imageH / 2); // y = Asin(ωx+φ) + b
+                $py = $A * sin( $w * $px + $f ) + $b + $this->imageH / 2; // y = Asin(ωx+φ) + b
                 $i  = (int)( $this->fontSize / 5 );
                 while ( $i > 0 ) {
                     imagesetpixel( $this->im,intval( $px + $i ),intval( $py + $i ),$this->color ); // 这里(while)循环画像素点比imagettftext和imagestring用字体大小一次画出（不用这while循环）性能要好很多
@@ -318,9 +326,9 @@ class Captcha
         }
 
         // 曲线后部分
-        $A   = mt_rand( 1,intval($this->imageH / 2) ); // 振幅
+        $A   = mt_rand( 1,$this->imageH / 2 ); // 振幅
         $f   = mt_rand( intval( -$this->imageH / 4 ),intval( $this->imageH / 4 ) ); // X轴方向偏移量
-        $T   = mt_rand( intval($this->imageH),intval($this->imageW * 2) ); // 周期
+        $T   = mt_rand( $this->imageH,$this->imageW * 2 ); // 周期
         $w   = ( 2 * M_PI ) / $T;
         $b   = $py - $A * sin( $w * $px + $f ) - $this->imageH / 2;
         $px1 = $px2;
@@ -350,7 +358,7 @@ class Captcha
             $noiseColor = imagecolorallocate( $this->im,mt_rand( 150,225 ),mt_rand( 150,225 ),mt_rand( 150,225 ) );
             for ( $j = 0; $j < 5; $j++ ) {
                 // 绘杂点
-                imagestring( $this->im,5,mt_rand( -10,intval($this->imageW) ),mt_rand( -10,intval($this->imageH) ),$codeSet[mt_rand( 0,29 )],$noiseColor );
+                imagestring( $this->im,5,mt_rand( -10,$this->imageW ),mt_rand( -10,$this->imageH ),$codeSet[mt_rand( 0,29 )],$noiseColor );
             }
         }
     }
@@ -374,11 +382,10 @@ class Captcha
 
         $gb = $bgs[array_rand( $bgs )];
 
-        [$width,$height] = @getimagesize( $gb );
+        list( $width,$height ) = @getimagesize( $gb );
         // Resample
         $bgImage = @imagecreatefromjpeg( $gb );
         @imagecopyresampled( $this->im,$bgImage,0,0,0,0,$this->imageW,$this->imageH,$width,$height );
         @imagedestroy( $bgImage );
     }
-
 }
